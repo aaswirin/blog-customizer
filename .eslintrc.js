@@ -1,10 +1,9 @@
 module.exports = {
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
-		ecmaVersion: 'latest',
+		ecmaVersion: 2020,
 		sourceType: 'module',
-		project: './tsconfig.json',
-
+		warnOnUnsupportedTypeScriptVersion: false,
 	},
 	settings: {
 		react: {
@@ -26,9 +25,6 @@ module.exports = {
 		'plugin:import/warnings',
 		'plugin:import/typescript',
 		'plugin:eslint-comments/recommended',
-		'airbnb',
-		'airbnb/hooks',
-		'airbnb-typescript',
 	],
 	rules: {
 		semi: [2, 'always'],
