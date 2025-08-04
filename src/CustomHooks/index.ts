@@ -2,7 +2,7 @@
  * Кастомные хуки
  */
 
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from 'react';
 
 // Закрывашка для панели параметров
 type TCloseProps = {
@@ -40,4 +40,34 @@ export const usePanelClose = ({isOpen, onClose, paramsRef, keysClose}: TClosePro
 		}
 
 	}, [isOpen, onClose]);
+}
+
+// Локальное хранилище
+export function useLocalStorage<T>(key: string, initialValue: T):
+	[T, React.Dispatch<React.SetStateAction<T>>] {
+
+	const [value, setValue] = useState<T>(() => {
+		try {
+			const item = window.localStorage.getItem(key);
+			return item ? JSON.parse(item) : initialValue;
+		} catch {
+			return initialValue;
+		}
+	});
+
+	useEffect(() => {
+		try {
+			// Если всё по умолчанию, то прибраться в хранилище
+			if (value === initialValue) {
+				window.localStorage.removeItem(key);
+				return;
+			}
+			const item = JSON.stringify(value);
+			window.localStorage.setItem(key, item);
+		} catch (error: any) {
+			console.log(error.message);
+		}
+	}, [value]);
+
+	return [value, setValue];
 }

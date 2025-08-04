@@ -5,11 +5,12 @@ import { Text } from 'src/ui/text';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
-import { usePanelClose } from 'src/CustomHooks';
+import { useLocalStorage, usePanelClose } from 'src/CustomHooks';
 
 import { settings } from 'src/constants/settingsApp';
 
-import { ArticleParamsFormProps } from 'src/types/types';
+import { ArticleParamsFormProps, TColors, TContentWidth, TLanguages } from 'src/types/types';
+
 import { defaultArticleState, fontFamilyOptions, fontSizeOptions, fontColors,
 	     backgroundColors, contentWidthArr, OptionType, ArticleStateType } from 'src/constants/articleProps';
 
@@ -19,13 +20,27 @@ import styles from './ArticleParamsForm.module.scss';
 
 export const ArticleParamsForm = ({applyParams}: ArticleParamsFormProps) => {
 	// Язык приложения
-	const language = settings.language;
-  // Перевести настройки
+	const navigatorLanguage = navigator.language;
+	let language: TLanguages = 'en';
+	if ((navigatorLanguage === 'ru') || (navigatorLanguage === 'de') || (navigatorLanguage === 'zh'))
+		language = navigatorLanguage;
+
+    // Перевести настройки
 	if (language !== 'ru') {
+		// Цвета
+		fontColors.forEach(color => {
+			color.title =
+				settings.components.colors[color.optionClassName as TColors][language];
+		});
+		backgroundColors.forEach(color => {
+			color.title =
+				settings.components.colors[color.optionClassName as TColors][language];
+		});
+
 		// Ширина контента
 		contentWidthArr.forEach(contentWidth => {
 			contentWidth.title =
-				settings.components.contentWidth[contentWidth.optionClassName as 'option-wide' | 'option-narrow'][language];
+				settings.components.contentWidth[contentWidth.optionClassName as TContentWidth][language];
 		});
 	}
 
@@ -35,7 +50,11 @@ export const ArticleParamsForm = ({applyParams}: ArticleParamsFormProps) => {
 	const paramsRef = useRef(null);
 	const paramsClassName = clsx(styles.container, paramsState && styles.container_open);
 
-	const [params, setParams] = useState(defaultArticleState);
+	// Локальное хранилище
+	const [storageParams, setStorageParams] = useLocalStorage(settings.localStorage.key, defaultArticleState);
+
+	const [params, setParams] = useState(storageParams);
+	applyParams(storageParams);
 
 	const updateFormParams = (newParams: Partial<ArticleStateType>) => {
 		setParams((prev) => ({...prev, ...newParams}));
@@ -75,6 +94,8 @@ export const ArticleParamsForm = ({applyParams}: ArticleParamsFormProps) => {
 		setParams(defaultArticleState);
 		applyParams(defaultArticleState);
 		handleParamsToggle();
+		// Прибраться в локальном хранилище
+		setStorageParams(defaultArticleState);
 	};
 
 	const handleSubmitForm = (event: React.FormEvent) => {
@@ -82,6 +103,8 @@ export const ArticleParamsForm = ({applyParams}: ArticleParamsFormProps) => {
 		setParams(params);
 		applyParams(params);
 		handleParamsToggle();
+		// Сохраниться в локальном хранилище
+		setStorageParams(params);
 	};
 
 	// Закрывашка для панели параметров
