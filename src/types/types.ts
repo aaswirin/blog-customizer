@@ -2,8 +2,7 @@
  * Всякие нужные типы
  */
 
-import {ArticleStateType, contentWidthArr} from "src/constants/articleProps"
-import {settings} from "src/constants/settingsApp";
+import {ArticleStateType} from "src/constants/articleProps"
 
 export type ArticleParamsFormProps = {
 	applyParams: (settings: ArticleStateType) => void;
